@@ -1,0 +1,9 @@
+Drop one mp3 here and name it exactly:  birthday-song.mp3
+
+(Or change the filename in  js/config.js  under `audio`.)
+
+It NEVER autoplays. A floating music button appears after the confetti
+explosion and she taps it to start.
+
+If this folder is empty, the music button quietly removes itself - which is
+why you can't see it yet.

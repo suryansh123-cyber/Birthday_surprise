@@ -1,0 +1,13 @@
+Drop her photos in this folder.
+
+Name them anything you like, then list them in  js/config.js  under `photos`:
+
+    { src: "images/photo01.jpg", caption: "Exhibit A.", feature: true },
+
+Recommended: .jpg or .webp, long edge 1600-2000px, quality ~80%, under 400KB
+each. Mix portrait, landscape and square on purpose - the layouts are built
+for mixed shapes. Bulk-compress for free at squoosh.app
+
+Works with anything from 6 to 60+ photos. Any file listed in config.js but
+missing from this folder shows a labelled placeholder telling you which
+filename it wanted, so nothing ever looks broken.

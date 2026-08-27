@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" data-mood="dream">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08070a">
+<meta name="description" content="A small birthday thing.">
+<meta name="robots" content="noindex, nofollow">
+<title>Happy Birthday ✨</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%82%3C/text%3E%3C/svg%3E">
+
+<!-- Fonts are progressive enhancement: if offline, the fallback stacks in
+     base.css take over and the layout is unchanged. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/intro.css">
+<link rel="stylesheet" href="css/sections.css">
+<link rel="stylesheet" href="css/media.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body class="pre-intro">
+
+<a class="skip-to-content" href="#hello">Skip to the main content</a>
+
+<!-- Shared particle canvas: confetti, fireworks, smoke, embers. -->
+<canvas id="fx" aria-hidden="true"></canvas>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     THE OPENING RITUAL  (removed from the DOM once it finishes)
+     ══════════════════════════════════════════════════════════════════ -->
+<div id="intro" data-stage="black" role="region" aria-label="Opening sequence">
+  <div class="intro-stage">
+    <div class="intro-lines" aria-live="polite"></div>
+
+    <p class="wish-line" hidden>Make a wish… ✨</p>
+    <div class="countdown" aria-hidden="true"></div>
+
+    <div class="blow-ui">
+      <button type="button" class="btn btn-blow">Blow the candles 💨</button>
+      <button type="button" class="btn btn-ghost btn-mic">or use your mic 🎤</button>
+      <p class="blow-hint">(you can also just tap the candles)</p>
+    </div>
+
+    <h1 class="boom-title" hidden>
+      <span class="boom-hb" aria-hidden="true">HAPPY BIRTHDAY</span>
+      <span class="boom-name" data-name></span>
+      <span class="sr-only">Happy Birthday</span>
+    </h1>
+    <p class="boom-sub" hidden>🎂 6 September ✨</p>
+  </div>
+
+  <button type="button" class="intro-skip">skip intro</button>
+</div>
+
+
+<!-- `inert` keeps the whole site un-focusable during the intro; aria-hidden
+     keeps it out of the accessibility tree. Both are lifted together. -->
+<main id="site" aria-hidden="true" inert>
+
+  <!-- ═══════════════════════════ 01 · ARRIVAL ═══════════════════════════ -->
+  <section id="hello" class="sec sec-hello" data-mood="dream">
+    <div class="wrap">
+      <p class="eyebrow" data-reveal>a small thing I made</p>
+      <h2 class="display display-xl" data-reveal data-split>
+        Happy Birthday, <em data-name></em>
+      </h2>
+      <p class="lede" data-reveal>
+        You said you like cute surprises. That was, in hindsight, a mistake.
+      </p>
+      <div class="hello-photos" data-reveal></div>
+      <p class="scroll-hint" data-reveal><span>scroll</span><i></i></p>
+    </div>
+  </section>
+
+
+  <!-- ═════════════════════ 02 · WHAT I'VE FIGURED OUT ═══════════════════ -->
+  <section id="figured" class="sec" data-mood="playful">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="eyebrow" data-reveal>01 — field notes</p>
+        <h2 class="display" data-reveal data-split>A few things I've figured out about you...</h2>
+        <p class="sub" data-reveal>
+          I haven't known you for that long, so don't worry… I haven't written a biography 😂
+        </p>
+      </header>
+      <div class="traits-host"></div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════ 03 · THE REPORT ════════════════════════════ -->
+  <section id="report" class="sec" data-mood="playful">
+    <div class="wrap wrap-narrow">
+      <header class="sec-head">
+        <p class="eyebrow" data-reveal>02 — peer reviewed by nobody</p>
+        <h2 class="display" data-reveal data-split>Your Unofficial Personality Report</h2>
+      </header>
+      <div class="report-host"></div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════ 04 · THINGS I NOTICED ══════════════════════ -->
+  <section id="noticed" class="sec" data-mood="warm">
+    <div class="wrap wrap-narrow">
+      <header class="sec-head">
+        <p class="eyebrow" data-reveal>03 — quietly observed</p>
+        <h2 class="display" data-reveal data-split>Things you probably don't know I noticed</h2>
+      </header>
+      <div class="noticed-host"></div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════ 05 · CINEMATIC PAUSE ONE ═══════════════════════ -->
+  <section id="pause1" class="sec sec-cine" data-mood="night" aria-label="A photograph"></section>
+
+
+  <!-- ═══════════════════════ 06 · THE EVIDENCE ══════════════════════════ -->
+  <section id="evidence-intro" class="sec sec-tight" data-mood="dusk">
+    <div class="wrap wrap-narrow center">
+      <h2 class="display" data-reveal data-split>Okay, I may have collected a few visual evidences 👀</h2>
+      <p class="sub" data-reveal>No, this isn't a dossier. Relax 😂</p>
+    </div>
+  </section>
+  <section id="evidence" class="sec sec-evidence" data-mood="dusk" aria-label="Floating photographs"></section>
+
+
+  <!-- ═══════════════════════ 07 · HER WORLD ═════════════════════════════ -->
+  <section id="world" class="sec" data-mood="warm">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="eyebrow" data-reveal>04 — the ecosystem</p>
+        <h2 class="display" data-reveal data-split>Your world, roughly mapped</h2>
+        <p class="sub" data-reveal>Tap any of them. I've been taking notes.</p>
+      </header>
+      <div class="world-host"></div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════ 08 · THE FEED ══════════════════════════════ -->
+  <section id="feed" class="sec" data-mood="editorial">
+    <div class="wrap wrap-narrow">
+      <header class="sec-head center">
+        <p class="eyebrow" data-reveal>05 — permanently posting</p>
+        <h2 class="display" data-reveal data-split>Creator mode: ON</h2>
+      </header>
+      <div class="feed-host"></div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════ 09 · MOTION (video) ════════════════════════ -->
+  <section id="motion" class="sec" data-mood="night">
+    <div class="wrap wrap-narrow">
+      <header class="sec-head center">
+        <p class="eyebrow" data-reveal>06 — moving pictures</p>
+        <h2 class="display" data-reveal data-split>Okay, this deserved motion.</h2>
+        <p class="sub" data-reveal>Some things are better seen than explained.</p>
+      </header>
+      <div class="video-host"></div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════ 10 · FILM STRIP ════════════════════════════ -->
+  <section id="strip-intro" class="sec sec-tight" data-mood="editorial">
+    <div class="wrap wrap-narrow center">
+      <p class="eyebrow" data-reveal>07 — the contact sheet</p>
+      <h2 class="display" data-reveal data-split>Keep going. It gets worse.</h2>
+    </div>
+  </section>
+  <section id="strip" class="sec sec-strip" data-mood="editorial" aria-label="Film strip of photographs"></section>
+
+
+  <!-- ═══════════════════════ 11 · THE PHOTO WALL ════════════════════════ -->
+  <section id="wall" class="sec" data-mood="editorial">
+    <div class="wrap">
+      <header class="sec-head center">
+        <p class="eyebrow" data-reveal>08 — the wall</p>
+        <h2 class="display" data-reveal data-split>A small collection of evidence</h2>
+        <p class="sub" data-reveal>
+          For legal reasons, these are completely unrelated to my previous statements 😂
+        </p>
+      </header>
+      <div class="wall-host"></div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════ 12 · ONE AT A TIME ═════════════════════════ -->
+  <section id="stills" class="sec sec-stills" data-mood="dusk" aria-label="One photograph at a time"></section>
+
+
+  <!-- ═══════════════════════ 13 · THE ARCHIVE ═══════════════════════════ -->
+  <section id="archive" class="sec" data-mood="editorial">
+    <div class="wrap">
+      <header class="sec-head center">
+        <p class="eyebrow" data-reveal>09 — the archive</p>
+        <h2 class="display" data-reveal data-split>Proof that your camera roll is 90% chaos</h2>
+      </header>
+      <div class="archive-video-host"></div>
+      <div class="archive-host"></div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════ 14 · THE MYSTERY ═══════════════════════════ -->
+  <section id="mystery" class="sec" data-mood="dusk">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="eyebrow" data-reveal>10 — still loading</p>
+        <h2 class="display" data-reveal data-split>Okay, I know a few things about you now...</h2>
+        <p class="sub" data-reveal>...but there's still a lot I haven't figured out.</p>
+      </header>
+      <div class="mystery-host"></div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════ 15 · CINEMATIC PAUSE TWO ══════════════════════ -->
+  <section id="pause2" class="sec sec-cine" data-mood="night" aria-label="A photograph"></section>
+
+
+  <!-- ═══════════════════════ 16 · THE FINALE ════════════════════════════ -->
+  <section id="finale" class="sec sec-finale" data-mood="gold">
+    <div class="wrap wrap-narrow center">
+
+      <div class="finale-open">
+        <p class="finale-pre" data-reveal>Okay.</p>
+        <p class="finale-pre finale-pre-2" data-reveal>Enough investigation.</p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-big btn-surprise">Open Your Birthday Surprise 🎁</button>
+        </div>
+      </div>
+
+      <div class="letter" hidden></div>
+
+      <div class="coda-launch btn-row" hidden>
+        <button type="button" class="btn btn-ghost btn-big btn-coda">One Last Thing 👀</button>
+      </div>
+
+      <div class="coda" hidden></div>
+
+      <p class="the-end" hidden>🎂</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>made with far too much effort · <span data-name></span> · 6 September</p>
+  </footer>
+
+</main>
+
+
+<!-- Load order matters: config → core → everything that depends on core. -->
+<script src="js/config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/lightbox.js"></script>
+<script src="js/gallery.js"></script>
+<script src="js/sections.js"></script>
+<script src="js/video.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/cursor.js"></script>
+<script src="js/intro.js"></script>
+<script src="js/finale.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

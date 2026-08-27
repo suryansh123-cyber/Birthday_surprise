@@ -1,0 +1,11 @@
+Drop 1-2 videos in this folder, then list them in  js/config.js  under `videos`:
+
+    { src: "videos/video01.mp4", poster: "images/photo01.jpg", caption: "..." },
+
+Use .mp4 (H.264 video + AAC audio) - it plays on every phone and browser.
+Keep each under ~15MB so it stays fast on mobile data.
+
+`poster` is the still frame shown before she presses play. Delete that line
+if you don't have one - a designed placeholder is used instead.
+
+Videos never autoplay with sound.

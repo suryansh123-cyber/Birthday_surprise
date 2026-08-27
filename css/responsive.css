@@ -1,0 +1,258 @@
+/* ============================================================================
+   RESPONSIVE  —  mobile is designed, not shrunk.
+   Rules of thumb applied here:
+     · nothing may overflow horizontally
+     · nothing important lives behind :hover
+     · touch targets ≥ 44px
+     · fewer simultaneous moving parts than desktop (smoothness > complexity)
+   ============================================================================ */
+
+/* ══════════════════════════════════════════ TABLET  (≤ 1080px) */
+@media (max-width: 1080px) {
+  .masonry { columns: 3; }
+  .traits > :first-child { grid-column: span 1; }
+}
+
+/* ══════════════════════════════════════════ SMALL TABLET (≤ 860px) */
+@media (max-width: 860px) {
+  .masonry { columns: 2; }
+
+  .wall { grid-template-columns: repeat(2, 1fr); }
+  .wall-card.w-wide { grid-column: span 2; }
+
+  .world { grid-template-columns: repeat(2, 1fr); }
+  .mysteries { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ══════════════════════════════════════════════ PHONE  (≤ 780px) */
+@media (max-width: 780px) {
+
+  :root {
+    --sec-y: clamp(72px, 11vh, 110px);
+    --radius-l: 20px;
+  }
+
+  body { font-size: 15.5px; line-height: 1.62; }
+
+  .display    { font-size: clamp(1.85rem, 8.4vw, 2.7rem); }
+  .display-xl { font-size: clamp(2.35rem, 13vw, 3.6rem); }
+  .lede { font-size: 1rem; margin-top: 20px; }
+  .sub  { font-size: .94rem; }
+  .sec-head { margin-bottom: 34px; }
+
+  /* ── traits: one per row, photo moves inline instead of floating ── */
+  .traits { grid-template-columns: 1fr; }
+  .traits > :first-child { grid-column: span 1; }
+  .trait-in { padding: 24px 22px; }
+  .trait-icon { width: 46px; height: 46px; font-size: 1.3rem; margin-bottom: 16px; }
+  .trait-photo {
+    position: static;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    margin-top: 20px;
+    transform: none;
+    border-radius: 14px;
+  }
+  .trait.has-photo .trait-body { max-width: none; }
+
+  /* ── meters: label row on top, bar row underneath ── */
+  .meter {
+    grid-template-columns: 28px 1fr auto;
+    grid-template-areas:
+      "icon label value"
+      "track track track";
+    gap: 10px 12px;
+    padding: 14px 2px;
+  }
+  .meter-icon  { grid-area: icon; }
+  .meter-label { grid-area: label; font-size: .92rem; }
+  .meter-value { grid-area: value; }
+  .meter-track { grid-area: track; height: 6px; }
+
+  /* ── observations ── */
+  .note { padding: 22px 20px; gap: 14px; grid-template-columns: auto 1fr; }
+  .note p { font-size: 1.12rem; }
+  .note:hover { transform: none; }
+
+  /* ── her world ── */
+  .world { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .world-card { padding: 20px 18px; gap: 10px; min-height: 148px; }
+  .world-icon { font-size: 1.5rem; }
+  .modal-panel { padding: 26px 20px; max-height: 90svh; }
+  .modal-photos { grid-template-columns: repeat(3, 1fr); }
+
+  /* ── mystery ── */
+  .mysteries { grid-template-columns: 1fr; }
+  .myst { padding: 22px 20px; }
+
+  /* ══════════════════════════ PHOTO TREATMENTS ══════════════════════ */
+
+  /* polaroids: a tight overlapping fan rather than a wide row */
+  .hello-photos { margin-top: 40px; }
+  .polaroid {
+    width: clamp(116px, 36vw, 158px);
+    margin-inline: -18px;
+    padding: 8px 8px 44px;
+    animation: none;               /* fewer perpetual animations on phones */
+  }
+  .polaroid:nth-child(n + 4) { display: none; }
+  .polaroid-cap { font-size: .95rem; }
+
+  /* cinematic reveal: shorter scroll, portrait-friendly frame */
+  .sec-cine { height: 190svh; }
+  .cine-stage { padding: 70px 18px 60px; gap: 16px; }
+  .cine-pre, .cine-post { font-size: 1.15rem; }
+  .cine-photo { border-radius: 16px; }
+
+  /* film strip: real horizontal swipe with snap points */
+  .sec-strip { height: auto; padding: 0; }
+  .strip-stage {
+    position: static;
+    height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-block: 20px;
+  }
+  .strip-stage::-webkit-scrollbar { display: none; }
+  .strip-track {
+    transform: none !important;
+    gap: 10px;
+    padding-inline: 18px;
+  }
+  .strip-card {
+    scroll-snap-align: center;
+    transform: none !important;
+  }
+  .strip-card.s-sm { width: 58vw; }
+  .strip-card.s-md { width: 72vw; }
+  .strip-card.s-lg { width: 82vw; }
+  .strip-cap { opacity: 1; transform: none; }   /* no hover on touch */
+
+  /* evidence: fewer, larger cards and a shorter scroll */
+  .sec-evidence { height: 260svh; }
+  .ev-card { aspect-ratio: 3 / 4.2; border-radius: 12px; }
+  .ev-caption { bottom: 34px; font-size: 1.25rem; }
+
+  /* feed */
+  .feed-grid { grid-template-columns: repeat(2, 1fr); gap: 4px; }
+  .feed-hero .feed-card { aspect-ratio: 4 / 5; }
+
+  /* photo wall: captions always visible, no repulsion physics */
+  .wall { grid-template-columns: repeat(2, 1fr); gap: 6px; padding-block: 14px; }
+  .wall-card { transform: translateY(calc(var(--ty) * .5)) rotate(var(--rot)); }
+  .wall-card:hover {
+    transform: translateY(calc(var(--ty) * .5)) rotate(var(--rot));
+    box-shadow: 0 22px 50px -26px rgba(0, 0, 0, .95);
+  }
+  .wall-card:active { transform: rotate(0deg) scale(.98); }
+  .wall-cap { opacity: .92; font-size: .9rem; }
+
+  /* one photo at a time */
+  .sec-stills { height: var(--stills-h, 420svh); }
+  .stills-stage { padding: 66px 18px 46px; gap: 14px; }
+  .stills-cap { font-size: 1.22rem; }
+  .stills-bar { width: 80px; }
+
+  /* masonry */
+  .masonry { columns: 2; column-gap: 8px; }
+  .mas-card { margin-bottom: 8px; border-radius: 10px; }
+  .mas-cap { opacity: .92; font-size: .88rem; }
+  .mas-card:hover { transform: none; }
+
+  /* ── video ── */
+  .vid-frame { aspect-ratio: 9 / 14; border-radius: 18px; }
+  .vid-bar { opacity: 1; transform: none; grid-template-columns: auto minmax(0,1fr) auto auto; padding: 30px 12px 14px; }
+  .vid-time { display: none; }
+  .vid-btn { width: 38px; height: 38px; }
+  .vid-play { width: 64px; }
+
+  /* ── lightbox ── */
+  .lb-img { max-height: calc(100svh - 200px); border-radius: 8px; }
+  .lb-stage { padding: 60px 12px 6px; }
+  .lb-bar { grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 10px; padding-inline: 12px; }
+  .lb-cap { font-size: 1.1rem; }
+  .lb-close { width: 42px; height: 42px; }
+
+  /* ── chrome ── */
+  .pill { padding: 4px; bottom: max(14px, env(safe-area-inset-bottom, 0px) + 10px); }
+  /* Thumb-sized targets: the visible dot stays 6px, the hit area is ~34x40. */
+  .pill-dot { padding: 17px 14px; }
+  .pill-label { display: none; }          /* dots only — labels need hover */
+  .pill-dot.on .pill-mark { transform: scale(1.7); }
+
+  .music { top: max(12px, env(safe-area-inset-top, 0px) + 8px); right: 12px; }
+  .music-btn { padding: 9px 14px 9px 12px; font-size: .74rem; }
+  .music-extra { display: none; }         /* volume slider is fiddly on touch */
+
+  .btn { padding: 14px 24px; }
+  .btn-big { padding: 17px 28px; font-size: 1rem; }
+  .btn-row { margin-top: 34px; }
+
+  .foot { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+
+  /* ── intro ── */
+  .cake { --u: clamp(3.6px, 1.5vmin, 5.4px); }
+  .intro-line { font-size: clamp(1.3rem, 6.2vw, 1.9rem); max-width: 16ch; }
+  .intro-line.big { font-size: clamp(1.9rem, 10vw, 3rem); }
+  .count-num { font-size: clamp(6rem, 40vw, 12rem); }
+  .boom-hb { font-size: .68rem; letter-spacing: .34em; text-indent: .34em; }
+  .boom-name { font-size: clamp(2.8rem, 19vw, 5rem); }
+  .blow-ui { gap: 10px; margin-bottom: 60px; }
+  .intro-skip { bottom: max(14px, env(safe-area-inset-bottom, 0px)); right: 14px; }
+}
+
+/* ═════════════════════════════════════════ SMALL PHONE (≤ 400px) */
+@media (max-width: 400px) {
+  .world { grid-template-columns: 1fr; }
+  .polaroid:nth-child(n + 3) { display: none; }
+  .feed-grid { grid-template-columns: repeat(2, 1fr); }
+  .modal-photos { grid-template-columns: repeat(2, 1fr); }
+  .stills-index { gap: 10px; }
+}
+
+/* ═══════════════════════════════ SHORT LANDSCAPE PHONES
+   The intro is vertically composed; on a 380px-tall viewport it needs to
+   compress hard rather than clip the cake or the buttons.               */
+@media (max-height: 520px) and (orientation: landscape) {
+  .intro-stage { padding: 3vh 0; }
+  .cake { --u: clamp(2.6px, 1.5vh, 4px); }
+  .intro-line { font-size: 1.15rem; }
+  .intro-line.big { font-size: 1.7rem; }
+  .count-num { font-size: 5rem; }
+  .blow-ui { flex-direction: row; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; }
+  .blow-hint { width: 100%; text-align: center; }
+  .boom-name { font-size: 3rem; }
+  .sec-cine, .sec-evidence, .sec-stills, .sec-strip { height: auto; }
+  .cine-stage, .ev-stage, .stills-stage, .strip-stage { position: static; height: auto; min-height: 100svh; }
+}
+
+/* ═════════════════════════════════════ POINTER-COARSE TOUCH-UPS
+   Hover states are dead weight on touch. Anything that only appeared on
+   hover is either made permanent or replaced with an :active response.  */
+@media (hover: none) {
+  .pcard:hover .pcard-img,
+  .mas-card:hover,
+  .strip-card:hover,
+  .polaroid:hover { transform: none; }
+
+  .strip-cap, .mas-cap, .wall-cap { opacity: .95; transform: none; }
+  /* No hover on touch, so the caption scrim is always on. */
+  .wall-card::after, .mas-card::after, .strip-card::after { opacity: 1; }
+
+  .pcard:active { transform: scale(.985); }
+  .trait-in:active, .world-card:active { transform: scale(.99); }
+
+  .cur-dot, .cur-ring { display: none; }
+}
+
+/* ═══════════════════════════════════ PRINT (just in case) */
+@media print {
+  #intro, #fx, .pill, .music, .sprog, .cur-dot, .cur-ring, .bg { display: none !important; }
+  #site { opacity: 1 !important; }
+  body { background: #fff; color: #000; }
+  .sec-cine, .sec-evidence, .sec-stills, .sec-strip { height: auto; }
+  .cine-stage, .ev-stage, .stills-stage, .strip-stage { position: static; height: auto; }
+}

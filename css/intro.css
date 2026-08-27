@@ -1,0 +1,523 @@
+/* ============================================================================
+   INTRO  —  black screen, cake, candles, countdown, the explosion title.
+   Visibility is driven entirely by #intro[data-stage], so the JS timeline
+   only ever flips one attribute.
+   ============================================================================ */
+
+#intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: #000;
+  overflow: hidden;
+  transition: opacity 1.1s var(--e-soft);
+}
+#intro.gone { opacity: 0; pointer-events: none; }
+
+/* A slow ambient bloom so pure black never feels like a dead screen. */
+#intro::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(45% 40% at 50% 52%, rgba(245, 196, 81, .10), transparent 70%);
+  opacity: 0;
+  transition: opacity 2s var(--e-soft);
+  pointer-events: none;
+}
+#intro[data-stage="cake"]::before,
+#intro[data-stage="count"]::before { opacity: 1; }
+#intro[data-stage="blow"]::before  { opacity: 1.4; }
+#intro[data-stage="dark"]::before  { opacity: 0; transition-duration: 1.2s; }
+#intro[data-stage="boom"]::before,
+#intro[data-stage="outro"]::before {
+  opacity: 1;
+  background: radial-gradient(60% 55% at 50% 46%, rgba(245, 196, 81, .22), transparent 72%);
+}
+
+.intro-stage {
+  position: relative;
+  width: min(1000px, 92vw);
+  height: 100svh;
+  display: grid;
+  /* One explicit column: every child shares the same cell stack. Without this,
+     auto-placement scatters them into implicit columns side by side. */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1fr auto 1fr;
+  align-items: center;
+  justify-items: center;
+  padding: 6vh 0;
+}
+/* Every child shares column 1 and stacks by row. Without this, two children
+   naming the same grid-row get auto-placed into side-by-side columns. */
+.intro-stage > * { grid-column: 1; }
+
+/* ─────────────────────────────────────────────────────────── the lines */
+.intro-lines {
+  grid-row: 2;
+  position: relative;
+  min-height: 4.2em;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  pointer-events: none;
+}
+.intro-line {
+  grid-area: 1 / 1;
+  font-family: var(--serif);
+  font-size: clamp(1.5rem, 4.2vw, 2.8rem);
+  line-height: 1.24;
+  letter-spacing: -.015em;
+  color: var(--cream);
+  max-width: 20ch;
+  opacity: 0;
+  transform: translateY(16px);
+  filter: blur(10px);
+  transition: opacity .85s var(--e-out), transform .85s var(--e-out), filter .85s var(--e-out);
+}
+.intro-line.in { opacity: 1; transform: none; filter: blur(0); }
+.intro-line.out {
+  opacity: 0;
+  transform: translateY(-14px);
+  filter: blur(10px);
+  transition-duration: .6s;
+}
+.intro-line.big {
+  font-size: clamp(2.1rem, 7vw, 4.4rem);
+  letter-spacing: -.03em;
+}
+
+/* Once the cake is on screen the prompt moves ABOVE it (row 1), leaving row 3
+   free for the blow buttons. Both used to sit in row 3 — one aligned to its
+   start, one to its end — which collided the moment the cake made row 3 short.
+
+   The stage reads as three clean bands from here on:
+       row 1  the line she's being told
+       row 2  the thing she's looking at   (cake → countdown → title)
+       row 3  the thing she can press      (buttons → subtitle)              */
+#intro[data-stage="cake"] .intro-lines,
+#intro[data-stage="count"] .intro-lines,
+#intro[data-stage="blow"] .intro-lines {
+  grid-row: 1;
+  align-self: end;
+  margin-bottom: clamp(14px, 4vh, 44px);
+}
+
+/* After the explosion the title owns row 2, so the closing lines drop to
+   row 3 and the date subtitle steps aside for them. */
+/* `exit` is included so the lines hold their position while they fade out,
+   instead of snapping back onto the title for the length of the transition. */
+#intro[data-stage="outro"] .intro-lines,
+#intro[data-stage="exit"] .intro-lines {
+  grid-row: 3;
+  align-self: start;
+  margin-top: clamp(14px, 4vh, 42px);
+}
+#intro[data-stage="outro"] .boom-sub {
+  opacity: 0;
+  transition: opacity .7s var(--e-soft);
+}
+
+/* ═══════════════════════════════════════════════════════════ THE CAKE */
+.cake {
+  --u: clamp(3.4px, 1.05vmin, 6.4px);   /* one design unit */
+  --lit: 1;
+  grid-row: 2;
+  position: relative;
+  width: calc(var(--u) * 46);
+  opacity: 0;
+  transform: translateY(26px) scale(.9);
+  transition: opacity 1.3s var(--e-out), transform 1.3s var(--e-out);
+  pointer-events: none;
+}
+#intro[data-stage="cake"] .cake,
+#intro[data-stage="count"] .cake,
+#intro[data-stage="blow"] .cake { opacity: 1; transform: none; pointer-events: auto; }
+#intro[data-stage="dark"] .cake {
+  opacity: .10;
+  transform: scale(.97);
+  transition-duration: 1.6s;
+}
+#intro[data-stage="boom"] .cake,
+#intro[data-stage="outro"] .cake,
+#intro[data-stage="exit"] .cake { opacity: 0; transition-duration: .8s; }
+
+/* Warm pool of candle light on everything below. */
+.cake-glow {
+  position: absolute;
+  left: 50%; top: 46%;
+  width: calc(var(--u) * 130);
+  height: calc(var(--u) * 130);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle,
+    rgba(255, 186, 88, calc(.30 * var(--lit))) 0%,
+    rgba(255, 150, 60, calc(.11 * var(--lit))) 34%,
+    transparent 66%);
+  pointer-events: none;
+  transition: opacity 1.2s var(--e-soft);
+  filter: blur(2px);
+}
+.cake.bright .cake-glow { animation: glow-flare 1.1s var(--e-soft); }
+@keyframes glow-flare {
+  0%   { transform: translate(-50%, -50%) scale(1); }
+  45%  { transform: translate(-50%, -50%) scale(1.22); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.cake-stack { position: relative; }
+
+/* ── candles ──────────────────────────────────────────────────────── */
+.candle-row {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--u) * 7);
+  margin-bottom: calc(var(--u) * -1);
+  position: relative;
+  z-index: 3;
+}
+
+.candle {
+  position: relative;
+  width: calc(var(--u) * 3);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/* Generous invisible tap target — the candle itself is tiny. */
+.candle::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 0;
+  width: calc(var(--u) * 15);
+  height: calc(var(--u) * 26);
+  transform: translate(-50%, -22%);
+}
+
+.stick {
+  width: calc(var(--u) * 3);
+  height: calc(var(--u) * 13);
+  border-radius: calc(var(--u) * 1.4) calc(var(--u) * 1.4) 2px 2px;
+  background:
+    repeating-linear-gradient(-58deg,
+      #fff5f7 0 calc(var(--u) * 2),
+      #f4a9b8 calc(var(--u) * 2) calc(var(--u) * 4));
+  box-shadow: inset calc(var(--u) * -.7) 0 calc(var(--u) * 1) rgba(0, 0, 0, .18);
+}
+.wick {
+  width: 1.5px;
+  height: calc(var(--u) * 1.8);
+  background: #4a3f38;
+  border-radius: 1px;
+}
+
+/* ── flame ────────────────────────────────────────────────────────── */
+.flame {
+  position: relative;
+  width: calc(var(--u) * 3.4);
+  height: calc(var(--u) * 7.4);
+  margin-bottom: calc(var(--u) * .2);
+  transform-origin: 50% 100%;
+  animation: flicker 2.4s ease-in-out infinite;
+  transition: opacity .5s var(--e-out), transform .55s var(--e-out), filter .5s var(--e-out);
+}
+.flame-outer, .flame-inner {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 50% 50% / 68% 68% 32% 32%;
+}
+.flame-outer {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 50% 82%,
+    #fff8d8 0%, #ffcf5e 26%, #ff9a2e 60%, rgba(255, 108, 30, .3) 86%, transparent 100%);
+  filter: blur(.4px);
+  box-shadow: 0 0 calc(var(--u) * 6) rgba(255, 168, 60, .75),
+              0 0 calc(var(--u) * 14) rgba(255, 140, 40, .38);
+}
+.flame-inner {
+  width: 46%;
+  height: 52%;
+  background: radial-gradient(ellipse at 50% 75%, #ffffff 0%, #fff2b8 55%, rgba(255,230,150,0) 100%);
+  animation: flicker-in 1.7s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { transform: scale(1)      skewX(0deg)   translateY(0); }
+  22%      { transform: scale(1.06, .95) skewX(-2.5deg) translateY(-.5px); }
+  46%      { transform: scale(.95, 1.07) skewX(2deg)  translateY(.5px); }
+  70%      { transform: scale(1.03, .98) skewX(-1.5deg) translateY(-.3px); }
+}
+@keyframes flicker-in {
+  0%, 100% { transform: translateX(-50%) scaleY(1); opacity: .95; }
+  50%      { transform: translateX(-50%) scaleY(1.14); opacity: 1; }
+}
+
+/* On "1" the flames flare up. */
+.cake.bright .flame { animation-duration: .9s; transform: scale(1.22); }
+.cake.bright .flame-outer {
+  box-shadow: 0 0 calc(var(--u) * 10) rgba(255, 180, 70, .95),
+              0 0 calc(var(--u) * 22) rgba(255, 150, 45, .5);
+}
+
+/* Extinguished: a quick dying flicker, then gone. Smoke is drawn on canvas. */
+.candle.out .flame {
+  animation: die .34s var(--e-io) forwards;
+  pointer-events: none;
+}
+@keyframes die {
+  0%   { transform: scale(1.15, .9); opacity: 1; }
+  35%  { transform: scale(.5, 1.25) translateY(-2px); opacity: .85; filter: blur(1px); }
+  100% { transform: scale(.05, .35) translateY(-4px); opacity: 0; filter: blur(3px); }
+}
+.candle.out .flame-outer { box-shadow: none; }
+
+/* Hover invites the tap. */
+.candle:not(.out):hover .flame { transform: scale(1.14); }
+
+/* ── tiers ────────────────────────────────────────────────────────── */
+.tier {
+  position: relative;
+  margin-inline: auto;
+  box-shadow:
+    inset 0 calc(var(--u) * 1.4) 0 rgba(255, 255, 255, .17),
+    inset 0 calc(var(--u) * -2.2) calc(var(--u) * 2.6) rgba(0, 0, 0, .3),
+    0 calc(var(--u) * 1.6) calc(var(--u) * 3.4) rgba(0, 0, 0, .5);
+}
+.tier-top {
+  width: calc(var(--u) * 30);
+  height: calc(var(--u) * 13);
+  border-radius: calc(var(--u) * 2.6) calc(var(--u) * 2.6) calc(var(--u) * 1.6) calc(var(--u) * 1.6);
+  background: linear-gradient(178deg, #fdf1e4 0%, #f5dcc6 44%, #e6c3a6 100%);
+  z-index: 2;
+}
+.tier-mid {
+  width: calc(var(--u) * 44);
+  height: calc(var(--u) * 16);
+  margin-top: calc(var(--u) * -1.5);
+  border-radius: calc(var(--u) * 3) calc(var(--u) * 3) calc(var(--u) * 2) calc(var(--u) * 2);
+  background: linear-gradient(178deg, #f3c9d4 0%, #e9aebf 46%, #d38ea3 100%);
+  z-index: 1;
+}
+
+/* Poured icing: a band across the top of each tier with drips hanging off it.
+   The band is what makes the drips read as icing rather than floating blobs. */
+.tier::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: calc(var(--u) * 3.6);
+  border-radius: inherit;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.tier-top::before { background: #fff6ec; }
+.tier-mid::before { background: #f8dbe3; }
+
+.drip {
+  position: absolute;
+  top: calc(var(--u) * 3);
+  width: calc(var(--u) * 4.4);
+  height: calc(var(--u) * 5);
+  border-radius: 0 0 46% 46%;
+}
+.tier-top .drip { background: #fff6ec; }
+.tier-mid .drip { background: #f8dbe3; }
+.tier-top .d1 { left: 6%;  height: calc(var(--u) * 6); }
+.tier-top .d2 { left: 26%; height: calc(var(--u) * 4); }
+.tier-top .d3 { left: 46%; height: calc(var(--u) * 7); }
+.tier-top .d4 { left: 66%; height: calc(var(--u) * 4.4); }
+.tier-top .d5 { left: 84%; height: calc(var(--u) * 5.6); }
+.tier-mid .d1 { left: 8%;  height: calc(var(--u) * 6.6); }
+.tier-mid .d2 { left: 32%; height: calc(var(--u) * 4.6); }
+.tier-mid .d3 { left: 56%; height: calc(var(--u) * 7.4); }
+.tier-mid .d4 { left: 79%; height: calc(var(--u) * 5); }
+
+.plate {
+  width: calc(var(--u) * 56);
+  height: calc(var(--u) * 3.2);
+  margin: calc(var(--u) * -.6) auto 0;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,.07));
+  box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 7) rgba(0, 0, 0, .6);
+}
+
+/* ═══════════════════════════════════════════════════════ COUNTDOWN */
+.countdown {
+  /* Both lines are named on purpose. For an absolutely-positioned grid child
+     an `auto` end line resolves to the container's padding edge rather than
+     spanning one track — with `grid-row: 2` alone this box stretched from the
+     cake down past the bottom of the stage, and the giant digit clipped the
+     "Make a wish" line on short screens. */
+  grid-row: 2 / 3;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 5;
+}
+.count-num {
+  grid-area: 1 / 1;
+  font-family: var(--serif);
+  font-size: clamp(7rem, 26vw, 17rem);
+  line-height: 1;
+  color: rgba(255, 255, 255, .93);
+  text-shadow: 0 0 60px rgba(255, 200, 110, .5);
+  opacity: 0;
+  transform: scale(1.5);
+  filter: blur(18px);
+  transition: opacity .5s var(--e-out), transform .8s var(--e-out), filter .5s var(--e-out);
+}
+.count-num.in  { opacity: 1; transform: scale(1); filter: blur(0); }
+.count-num.out {
+  opacity: 0;
+  transform: scale(.72);
+  filter: blur(12px);
+  transition-duration: .5s;
+}
+
+.wish-line {
+  grid-row: 3;
+  align-self: start;
+  margin-top: clamp(20px, 5vh, 54px);
+  font-family: var(--serif);
+  font-size: clamp(1.25rem, 3.2vw, 2rem);
+  color: var(--gold-2);
+  letter-spacing: .01em;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .9s var(--e-out), transform .9s var(--e-out);
+  z-index: 6;
+}
+.wish-line.in { opacity: 1; transform: none; }
+
+/* ══════════════════════════════════════════════════════ BLOW UI */
+.blow-ui {
+  grid-row: 3;
+  align-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: clamp(12px, 4vh, 40px);
+  opacity: 0;
+  transform: translateY(18px);
+  pointer-events: none;
+  transition: opacity .8s var(--e-out), transform .8s var(--e-out);
+  z-index: 7;
+}
+.blow-ui.show { opacity: 1; transform: none; pointer-events: auto; }
+.blow-ui .btn-blow {
+  --btn-bg: linear-gradient(100deg, rgba(245,196,81,.94), rgba(255,201,163,.94));
+  --btn-fg: #1a1206;
+  border-color: transparent;
+  box-shadow: 0 18px 50px -20px rgba(245, 196, 81, .85);
+}
+.blow-hint {
+  font-size: .76rem;
+  color: rgba(255, 255, 255, .38);
+  letter-spacing: .04em;
+}
+
+/* ══════════════════════════════════════════ THE EXPLOSION TITLE
+   Emerges from the particle burst: heavy blur + scale collapsing inward. */
+.boom-title {
+  grid-row: 2;
+  text-align: center;
+  margin: 0;
+  z-index: 8;
+}
+.boom-hb {
+  display: block;
+  font-family: var(--sans);
+  font-size: clamp(.72rem, 2.4vw, 1.15rem);
+  font-weight: 500;
+  letter-spacing: .48em;
+  text-indent: .48em;
+  color: rgba(255, 255, 255, .62);
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 1s var(--e-out) .45s, transform 1s var(--e-out) .45s;
+}
+.boom-name {
+  display: block;
+  margin-top: .12em;
+  font-family: var(--serif);
+  font-size: clamp(3.2rem, 15vw, 11rem);
+  line-height: .96;
+  letter-spacing: -.035em;
+  background: linear-gradient(96deg, #ffe6a8 0%, #f5c451 28%, #f4a9b8 62%, #b9a7ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+  transform: scale(1.45);
+  filter: blur(34px);
+  transition:
+    opacity 1.15s var(--e-out),
+    transform 1.5s var(--e-out),
+    filter 1.15s var(--e-out);
+}
+.boom-title.in .boom-hb   { opacity: 1; transform: none; }
+.boom-title.in .boom-name { opacity: 1; transform: scale(1); filter: blur(0); }
+
+.boom-sub {
+  grid-row: 3;
+  align-self: start;
+  margin-top: clamp(16px, 4vh, 40px);
+  font-size: .84rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .45);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 1s var(--e-out), transform 1s var(--e-out);
+  z-index: 8;
+}
+.boom-sub.in { opacity: 1; transform: none; }
+
+/* Everything fades on the way out. */
+#intro[data-stage="exit"] .boom-title,
+#intro[data-stage="exit"] .boom-sub,
+#intro[data-stage="exit"] .intro-lines {
+  opacity: 0;
+  transition: opacity .9s var(--e-soft);
+}
+
+/* ══════════════════════════════════════════════════════ SKIP BUTTON */
+.intro-skip {
+  position: absolute;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  z-index: 12;
+  padding: 10px 18px;
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, .32);
+  font-size: .72rem;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .35s var(--e-out), border-color .35s var(--e-out);
+}
+.intro-skip:hover { color: rgba(255, 255, 255, .8); border-color: rgba(255, 255, 255, .3); }
+#intro[data-stage="boom"] .intro-skip,
+#intro[data-stage="outro"] .intro-skip,
+#intro[data-stage="exit"] .intro-skip { opacity: 0; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .flame, .flame-inner { animation: none; }
+  .cake.bright .cake-glow { animation: none; }
+  .count-num { filter: none; transform: none; }
+  .boom-name { filter: none; transform: none; }
+  .candle.out .flame { animation: none; opacity: 0; }
+}

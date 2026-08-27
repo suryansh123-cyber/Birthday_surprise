@@ -1,0 +1,651 @@
+/* ============================================================================
+   BASE  —  design tokens, reset, typography, backgrounds, buttons,
+   the shared reveal system, navigation, cursor and music control.
+   ============================================================================ */
+
+:root {
+  /* ---- ink & light -------------------------------------------------- */
+  --ink:        #08070a;
+  --ink-2:      #100e16;
+  --ink-3:      #191622;
+  --cream:      #f8f3ec;
+  --cream-dim:  #e7ded2;
+
+  /* ---- accents ------------------------------------------------------ */
+  --rose:   #f4a9b8;
+  --peach:  #ffc9a3;
+  --lilac:  #b9a7ff;
+  --mint:   #a8e0d0;
+  --gold:   #f5c451;
+  --gold-2: #ffe6a8;
+
+  /* ---- surfaces ----------------------------------------------------- */
+  --glass:        rgba(255, 255, 255, .07);
+  --glass-strong: rgba(255, 255, 255, .13);
+  --hair:         rgba(255, 255, 255, .13);
+  --hair-soft:    rgba(255, 255, 255, .07);
+
+  /* Text colour is re-declared per mood further down. */
+  --fg:      var(--cream);
+  --fg-soft: rgba(248, 243, 236, .62);
+  --fg-dim:  rgba(248, 243, 236, .40);
+
+  /* ---- type --------------------------------------------------------- */
+  --serif: "Instrument Serif", "Iowan Old Style", "Palatino Linotype",
+           Palatino, Georgia, "Times New Roman", serif;
+  --sans:  "Space Grotesk", ui-sans-serif, system-ui, -apple-system,
+           "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --hand:  "Caveat", "Segoe Script", "Bradley Hand", cursive;
+  --mono:  ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ---- motion ------------------------------------------------------- */
+  --e-out:  cubic-bezier(.16, 1, .3, 1);
+  --e-io:   cubic-bezier(.65, 0, .35, 1);
+  --e-soft: cubic-bezier(.25, .8, .25, 1);
+  --e-back: cubic-bezier(.34, 1.4, .48, 1);
+
+  /* ---- rhythm ------------------------------------------------------- */
+  --pad:     clamp(20px, 5vw, 76px);
+  --sec-y:   clamp(96px, 15vh, 190px);
+  --radius:  18px;
+  --radius-l: 26px;
+}
+
+/* ---------------------------------------------------------------- reset */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--ink);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: clamp(15px, 1.05vw, 17px);
+  line-height: 1.65;
+  font-weight: 300;
+  letter-spacing: .002em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;          /* belt-and-braces against stray transforms */
+  text-rendering: optimizeLegibility;
+}
+
+/* The UA's `[hidden] { display: none }` loses to any author `display` rule,
+   which would leave the lightbox and modals as invisible full-screen click
+   blockers after closing. Make the attribute win everywhere. */
+[hidden] { display: none !important; }
+
+h1, h2, h3, h4, p, figure, blockquote { margin: 0; }
+img, video, canvas { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; }
+code { font-family: var(--mono); font-size: .88em; }
+
+::selection { background: var(--gold); color: var(--ink); }
+
+/* ------------------------------------------------------------- a11y */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+.skip-to-content {
+  position: fixed; top: -100px; left: 16px; z-index: 9999;
+  padding: 12px 20px; border-radius: 999px;
+  background: var(--gold); color: var(--ink);
+  font-weight: 600; text-decoration: none;
+  transition: top .25s var(--e-out);
+}
+.skip-to-content:focus { top: 16px; }
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* ══════════════════════════════════════════════════ BACKGROUND SYSTEM
+   Seven gradient layers stacked in a fixed backdrop. Only opacity animates,
+   so mood changes are genuinely smooth (gradients themselves can't tween). */
+.bg {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+}
+.bg-layer {
+  position: absolute; inset: 0;
+  opacity: 0;
+  transition: opacity 1.5s var(--e-soft);
+  will-change: opacity;
+}
+
+.bg-dream {
+  background:
+    radial-gradient(120% 90% at 18% 8%,  #3a2a52 0%, transparent 58%),
+    radial-gradient(100% 80% at 84% 22%, #4a3149 0%, transparent 60%),
+    radial-gradient(140% 110% at 50% 100%, #241d33 0%, #0d0b14 72%);
+}
+.bg-playful {
+  background:
+    radial-gradient(110% 80% at 12% 12%, #56395c 0%, transparent 55%),
+    radial-gradient(100% 90% at 88% 30%, #6a4355 0%, transparent 58%),
+    radial-gradient(130% 110% at 50% 100%, #2b2136 0%, #120f19 74%);
+}
+.bg-warm {
+  background:
+    radial-gradient(110% 85% at 20% 10%, #6b4a44 0%, transparent 56%),
+    radial-gradient(100% 80% at 82% 34%, #7a5548 0%, transparent 58%),
+    radial-gradient(130% 110% at 50% 100%, #2f2529 0%, #141014 74%);
+}
+.bg-editorial {
+  background:
+    radial-gradient(120% 90% at 50% 0%, #26242c 0%, transparent 62%),
+    linear-gradient(180deg, #1a1920 0%, #121118 55%, #0d0c11 100%);
+}
+.bg-dusk {
+  background:
+    radial-gradient(110% 80% at 78% 10%, #3f2e58 0%, transparent 56%),
+    radial-gradient(100% 90% at 14% 46%, #2c2a52 0%, transparent 58%),
+    radial-gradient(140% 120% at 50% 100%, #1b1729 0%, #0a0910 76%);
+}
+.bg-night {
+  background:
+    radial-gradient(120% 100% at 50% 40%, #14121b 0%, #08070a 68%),
+    linear-gradient(180deg, #0a090e 0%, #07060a 100%);
+}
+.bg-gold {
+  background:
+    radial-gradient(100% 70% at 50% 22%, #5c4326 0%, transparent 56%),
+    radial-gradient(120% 90% at 20% 80%, #4a2f3c 0%, transparent 60%),
+    radial-gradient(140% 120% at 50% 100%, #2a2029 0%, #100c12 76%);
+}
+
+/* Fine film grain — kills gradient banding and adds a printed feel. */
+.bg-grain {
+  position: absolute; inset: -50%;
+  opacity: .5;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Particle canvas. Must sit ABOVE the intro overlay (z-index 200) — the whole
+   celebration happens while the intro is still on screen, and at a lower
+   z-index the explosion renders behind an opaque black background, i.e.
+   invisibly. Kept below the lightbox/modal so confetti can't cover a dialog.
+   pointer-events: none means it never intercepts a click. */
+#fx {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 250;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════════════ LAYOUT */
+#site {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 1.1s var(--e-soft);
+}
+body.site-ready #site { opacity: 1; }
+body.pre-intro { overflow: hidden; }
+
+.sec {
+  position: relative;
+  padding: var(--sec-y) 0;
+}
+.sec:focus { outline: none; }
+.sec-tight { padding: clamp(60px, 9vh, 110px) 0; }
+
+.wrap {
+  width: min(1280px, 100% - var(--pad) * 2);
+  margin-inline: auto;
+}
+.wrap-narrow { width: min(880px, 100% - var(--pad) * 2); }
+.center { text-align: center; }
+
+.sec-head { margin-bottom: clamp(38px, 6vw, 76px); }
+.sec-head.center { text-align: center; }
+
+/* ══════════════════════════════════════════════════════ TYPOGRAPHY */
+.display {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2.15rem, 5.6vw, 4.4rem);
+  line-height: 1.04;
+  letter-spacing: -.022em;
+  text-wrap: balance;
+}
+.display-xl { font-size: clamp(2.7rem, 8.2vw, 6.6rem); }
+.display em {
+  font-style: italic;
+  background: linear-gradient(96deg, var(--gold-2), var(--rose) 46%, var(--lilac));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.eyebrow {
+  font-size: .715rem;
+  font-weight: 500;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin-bottom: 18px;
+}
+
+.lede {
+  margin-top: 26px;
+  font-size: clamp(1.02rem, 1.7vw, 1.24rem);
+  color: var(--fg-soft);
+  max-width: 44ch;
+  text-wrap: pretty;
+}
+.center .lede, .sec-head.center .sub { margin-inline: auto; }
+
+.sub {
+  margin-top: 20px;
+  font-size: clamp(.96rem, 1.4vw, 1.08rem);
+  color: var(--fg-soft);
+  max-width: 56ch;
+  text-wrap: pretty;
+}
+
+/* ══════════════════════════════════════════════════ REVEAL SYSTEM
+   One shared entrance: rise + fade + a short blur burn-in. Children
+   stagger off --i. Used by every section on the site.                */
+[data-reveal] {
+  opacity: 0;
+  filter: blur(6px);
+  transition:
+    opacity   .9s var(--e-out) calc(var(--i, 0) * 75ms),
+    transform .9s var(--e-out) calc(var(--i, 0) * 75ms),
+    filter    .9s var(--e-out) calc(var(--i, 0) * 75ms);
+  will-change: opacity, transform;
+}
+[data-reveal].in {
+  opacity: 1;
+  filter: blur(0);
+}
+
+/* The rise is opt-out. Elements that own their `transform` (rotated wall
+   cards, pointer-tilted cards) use data-reveal="fade" and get only the
+   opacity + blur half — otherwise `.in { transform: none }` would silently
+   erase their rotation the moment they scrolled into view. */
+[data-reveal]:not([data-reveal="fade"])     { transform: translateY(26px); }
+[data-reveal]:not([data-reveal="fade"]).in  { transform: none; }
+
+/* Word-by-word headline reveal (applied by core.splitWords). */
+[data-split] .w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: .06em;
+  margin-bottom: -.06em;
+}
+[data-split] .w-i {
+  display: inline-block;
+  transform: translateY(110%);
+  transition: transform 1s var(--e-out);
+}
+[data-split].in .w-i { transform: none; }
+
+/* ══════════════════════════════════════════════════════════ BUTTONS */
+.btn {
+  --btn-bg: var(--glass-strong);
+  --btn-fg: var(--cream);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 30px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-size: .95rem;
+  font-weight: 500;
+  letter-spacing: .01em;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  transition:
+    background .4s var(--e-out),
+    border-color .4s var(--e-out),
+    box-shadow .4s var(--e-out),
+    color .3s var(--e-out),
+    opacity .4s var(--e-out);
+  overflow: hidden;
+}
+.btn::after {                       /* sheen that sweeps on hover */
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 34%, rgba(255,255,255,.20) 50%, transparent 66%);
+  transform: translateX(-120%);
+  transition: transform .8s var(--e-out);
+  pointer-events: none;
+}
+.btn:hover {
+  background: rgba(255, 255, 255, .17);
+  border-color: rgba(255, 255, 255, .3);
+  box-shadow: 0 14px 44px -18px rgba(0, 0, 0, .85);
+}
+.btn:hover::after { transform: translateX(120%); }
+.btn:active { transform: scale(.975); }
+.btn[disabled] { cursor: default; opacity: .45; }
+.btn[disabled]:hover::after { transform: translateX(-120%); }
+
+.btn-big {
+  padding: 19px 40px;
+  font-size: clamp(.98rem, 1.5vw, 1.1rem);
+  font-weight: 600;
+}
+.btn-ghost {
+  --btn-bg: transparent;
+  --btn-fg: var(--fg-soft);
+  border-color: var(--hair-soft);
+}
+.btn-ghost:hover { --btn-fg: var(--cream); }
+
+.btn-surprise {
+  --btn-bg: linear-gradient(100deg, var(--gold) 0%, var(--peach) 52%, var(--rose) 100%);
+  --btn-fg: #1a1206;
+  border-color: transparent;
+  box-shadow: 0 0 0 0 rgba(245, 196, 81, .5), 0 20px 60px -22px rgba(245, 196, 81, .7);
+  animation: pulse-gold 3.4s var(--e-soft) infinite;
+}
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,196,81,.42), 0 20px 60px -22px rgba(245,196,81,.6); }
+  50%      { box-shadow: 0 0 0 16px rgba(245,196,81,0), 0 20px 60px -22px rgba(245,196,81,.8); }
+}
+.btn-surprise:hover { box-shadow: 0 22px 70px -20px rgba(245, 196, 81, .9); }
+
+.btn-row {
+  margin-top: 44px;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  transition: opacity .5s var(--e-out), transform .5s var(--e-out);
+}
+.btn-row.gone {
+  opacity: 0;
+  transform: translateY(-8px) scale(.96);
+  pointer-events: none;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════ SCROLL HINT */
+.scroll-hint {
+  margin-top: clamp(48px, 8vh, 96px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: .68rem;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+.scroll-hint i {
+  display: block;
+  width: 52px; height: 1px;
+  background: linear-gradient(90deg, var(--fg-dim), transparent);
+  position: relative;
+  overflow: visible;
+}
+.scroll-hint i::after {
+  content: "";
+  position: absolute; top: -1px; left: 0;
+  width: 14px; height: 3px; border-radius: 3px;
+  background: var(--gold);
+  animation: hint-run 2.6s var(--e-io) infinite;
+}
+@keyframes hint-run {
+  0%   { transform: translateX(0);    opacity: 0; }
+  22%  { opacity: 1; }
+  78%  { opacity: 1; }
+  100% { transform: translateX(40px); opacity: 0; }
+}
+
+/* ═════════════════════════════════════════════ SCROLL PROGRESS LINE */
+.sprog {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 2px; z-index: 80;
+  background: rgba(255, 255, 255, .05);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .8s var(--e-out);
+}
+body.intro-done .sprog { opacity: 1; }
+.sprog i {
+  display: block; height: 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, var(--lilac), var(--rose) 45%, var(--gold));
+  box-shadow: 0 0 14px rgba(245, 196, 81, .5);
+}
+
+/* ══════════════════════════════════════════════════════ PILL NAV */
+.pill {
+  position: fixed;
+  left: 50%;
+  bottom: max(20px, env(safe-area-inset-bottom, 0px) + 14px);
+  transform: translateX(-50%);
+  z-index: 85;
+  padding: 8px;
+  border-radius: 999px;
+  background: rgba(16, 14, 22, .62);
+  border: 1px solid var(--hair);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  backdrop-filter: blur(22px) saturate(1.4);
+  box-shadow: 0 18px 50px -20px rgba(0, 0, 0, .95);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .9s var(--e-out), transform .55s var(--e-out);
+}
+body.intro-done .pill { opacity: 1; pointer-events: auto; }
+body.intro-done .pill.tuck {
+  transform: translateX(-50%) translateY(150%);
+}
+
+.pill-list {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  list-style: none;
+  margin: 0; padding: 0;
+}
+.pill-dot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--fg-dim);
+  transition: color .35s var(--e-out), background .35s var(--e-out);
+}
+.pill-mark {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  transition: transform .4s var(--e-back), box-shadow .4s var(--e-out);
+  flex: none;
+}
+.pill-label {
+  font-size: .68rem;
+  letter-spacing: .08em;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0;
+  transition: max-width .5s var(--e-out), opacity .35s var(--e-out);
+}
+.pill-dot:hover { color: var(--cream); background: rgba(255, 255, 255, .07); }
+.pill-dot:hover .pill-label { max-width: 110px; opacity: 1; }
+.pill-dot.on { color: var(--gold); }
+.pill-dot.on .pill-mark {
+  transform: scale(1.5);
+  box-shadow: 0 0 12px var(--gold);
+}
+.pill-dot.on .pill-label { max-width: 110px; opacity: 1; }
+
+/* ══════════════════════════════════════════════════ MUSIC CONTROL */
+.music {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top, 0px) + 10px);
+  right: 16px;
+  z-index: 86;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(-14px);
+  pointer-events: none;
+  transition: opacity .9s var(--e-out), transform .9s var(--e-out);
+}
+.music.show { opacity: 1; transform: none; pointer-events: auto; }
+
+.music-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px 9px 13px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  background: rgba(16, 14, 22, .62);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  color: var(--fg-soft);
+  font-size: .78rem;
+  cursor: pointer;
+  transition: color .3s var(--e-out), border-color .3s var(--e-out), background .3s var(--e-out);
+}
+.music-btn:hover { color: var(--cream); border-color: rgba(255,255,255,.28); }
+.music.on .music-btn { color: var(--gold); border-color: rgba(245,196,81,.4); }
+
+.music-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 13px;
+}
+.music-eq i {
+  width: 2px;
+  height: 4px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: height .3s var(--e-out);
+}
+.music.on .music-eq i { animation: eq 1s ease-in-out infinite; }
+.music.on .music-eq i:nth-child(2) { animation-delay: .18s; }
+.music.on .music-eq i:nth-child(3) { animation-delay: .36s; }
+.music.on .music-eq i:nth-child(4) { animation-delay: .12s; }
+.music.muted .music-eq i { animation-play-state: paused; }
+@keyframes eq {
+  0%, 100% { height: 4px; }
+  50%      { height: 13px; }
+}
+
+.music-extra {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-width .5s var(--e-out), opacity .4s var(--e-out);
+}
+.music:hover .music-extra,
+.music:focus-within .music-extra { max-width: 150px; opacity: 1; }
+
+.music-mute {
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  border: 1px solid var(--hair);
+  border-radius: 50%;
+  background: rgba(16, 14, 22, .62);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  color: var(--fg-soft);
+  cursor: pointer;
+  flex: none;
+}
+.music-mute:hover { color: var(--cream); }
+
+.music-vol {
+  width: 70px;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════ CUSTOM CURSOR */
+.cur-dot, .cur-ring {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s var(--e-out);
+}
+body.cur-on .cur-dot, body.cur-on .cur-ring { opacity: 1; }
+
+.cur-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 12px rgba(245, 196, 81, .85);
+}
+.cur-ring {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .32);
+  --s: 1;
+  transition: opacity .3s var(--e-out), border-color .35s var(--e-out),
+              background .35s var(--e-out), width .35s var(--e-out), height .35s var(--e-out);
+}
+.cur-ring.hot {
+  width: 54px; height: 54px;
+  border-color: rgba(245, 196, 81, .55);
+  background: rgba(245, 196, 81, .08);
+}
+.cur-ring.press { --s: .82; }
+
+/* ═══════════════════════════════════════════════════════════ FOOTER */
+.foot {
+  padding: 70px var(--pad) calc(120px + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+  font-size: .74rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  position: relative;
+  z-index: 1;
+}
+
+/* ═════════════════════════════════════════════════ REDUCED MOTION
+   Big transforms, parallax drift and looping animations are removed.
+   State changes stay visible — nothing becomes invisible or unusable. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .18s !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal] { transform: none; filter: none; }
+  [data-split] .w-i { transform: none; }
+  .btn::after { display: none; }
+  .bg-grain { display: none; }
+  .scroll-hint i::after { animation: none; opacity: 1; }
+}
